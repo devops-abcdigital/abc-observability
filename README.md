@@ -1,58 +1,62 @@
 # abc-observability
 
-abc-observability
+Shared observability for ABC Digital Node.js services:
 
-This repository was generated using a project template in Backstage.
-It is registered in the Backstage Software Catalog.
+- **[`@devops-abcdigital/observability-node`](packages/node)**: an OpenTelemetry tracing library. Install it, start the
+  app with `node --import`, set a few `OTEL_*` variables, and every request, framework handler, database query and
+  outgoing call becomes one connected trace across services. Traces only; no logs or metrics.
+- **[Teams error alerts](alerts)**: Grafana alert rules that post to one shared Microsoft Teams channel when a
+  service's failed requests or failed background jobs pass a threshold.
 
-## Catalog and infrastructure metadata
+```
+App (node --import …/register)
+  │ OTLP/HTTP :4318
+  ▼
+Alloy (alloy-shared, run by DevOps) ──▶ Tempo ──▶ Grafana agf.abcdigital.io ──▶ Teams alert channel
+```
 
-`catalog-info.yaml` registers this project and links its source code and TechDocs.
-The JSON file [`infra_info.json`](infra_info.json) records the Catalog reference,
-owner, repository, branch, documentation paths and Docker image repository.
-Its `defaults` section contains public Compose runtime, image, port and health
-check settings. `.env.example` lists `PROJECT_NAME` and `PORT` for local use.
-Provisioning initializes these keys in secret storage using the selected internal
-port; deployment injects the saved environment without writing an env file on the host.
-The repository metadata starts with an empty `environments` list.
-Fill it with the real server, branch, resource limits and host/app ports after setup.
-The Environments & Servers tab currently reads backend setup records; it does not
-read or synchronize this repository file automatically.
+This repository is a library: nothing here is deployed.
 
 ## Documentation
 
-Documentation is available in [docs/index.md](docs/index.md).
-See the [Backstage Catalog & TechDocs Guide](docs/index.md) to configure Catalog and TechDocs.
-Navigation is configured in `mkdocs.yml`; open the Component's **Docs** tab in Backstage to read it.
+- [Getting started](docs/getting-started.md): add tracing to a service in three steps.
+- [Conventions](docs/conventions.md): service names, environments, span and job names, data that must never go into a
+  span.
+- [Teams error alerts](docs/alerts.md): how failures become Teams messages.
+- [Releasing](docs/releasing.md): publishing a new version.
+- [Example](examples/multi-service): three services in one trace, a failing service and a background job.
 
-## Getting Started
+The same pages appear on the component's **Docs** tab in Backstage (`mkdocs.yml`).
 
-```bash
-npm install
-cp .env.example .env
-npm start
-```
+## Repository layout
 
-This starter uses the ABC Digital Express application with its static dashboard.
-Use Node.js 24 or later. The server loads the optional root `.env` file on startup;
-existing process variables supplied by Jenkins or Docker take precedence.
-Restart the server after changing `.env`.
-Open `http://localhost:3000`, `/api/health` and `/api/infra` after starting it.
-Use `npm ci` for reproducible installation with the included lockfile.
+| Path                     | Content                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| `packages/node`          | the published library                                       |
+| `examples/multi-service` | runnable example (`gateway` → `auth` → `users` + otel-lgtm) |
+| `alerts`                 | Grafana alert rule, Teams message template, setup guide     |
+| `docs`                   | TechDocs pages                                              |
+| `scripts/release.mjs`    | the guarded release script                                  |
+| `docker-compose.dev.yml` | local Grafana + Tempo (`grafana/otel-lgtm`) for testing     |
 
-The dashboard reads the root `infra_info.json` through `/api/infra`.
-The badge above the page heading displays the container's `PROJECT_NAME`, falling
-back to `projectName` in `infra_info.json` when unset or blank. Only this display
-name is exposed from the environment. After editing or uploading environment
-variables in Backstage, save and deploy again, then reload the page.
-For existing generated repositories, copy the updated `server.js` and
-`public/index.html` from this starter into the application repository and rebuild
-its image; updating the Backstage template alone does not update existing apps.
-Unallocated servers, ports and resources remain unset; update the file with actual
-environment settings after provisioning. No production server values are copied
-from the original demo. Never store credentials in this public metadata file.
+## Development
+
+Node 24 (`.nvmrc`). npm workspaces share the root `package-lock.json`.
 
 ```bash
-docker build -t abc-observability .
-docker run --rm -p 3000:3000 abc-observability
+npm ci
+npm run build      # compile packages/node
+npm run verify     # types, lint, format
+npm test           # unit + integration tests (spawns real Node processes)
 ```
+
+Local trace backend: `docker compose -f docker-compose.dev.yml up -d`, then Grafana at <http://localhost:3001>
+(Explore → Tempo) and OTLP at `http://localhost:4318`.
+
+Changes to `packages/*` need a changeset (`npx changeset`). Releases: see [docs/releasing.md](docs/releasing.md).
+
+## Backstage
+
+`catalog-info.yaml` registers this repository as a `library` component; `infra_info.json` holds its catalog metadata.
+Neither contains secrets, and none may be added: tokens live in each person's `~/.npmrc` or in CI credentials, and
+the Teams webhook URL only in Grafana's contact point.

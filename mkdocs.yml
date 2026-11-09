@@ -1,6 +1,10 @@
-site_name: "abc-observability"
+site_name: 'abc-observability'
 docs_dir: docs
 nav:
+  - Getting started: getting-started.md
+  - Conventions: conventions.md
+  - Teams error alerts: alerts.md
+  - Releasing: releasing.md
   - Backstage Catalog & TechDocs Guide: index.md
 plugins:
   - techdocs-core
