@@ -1,0 +1,59 @@
+{
+  "name": "@devops-abcdigital/observability-node",
+  "version": "0.0.0",
+  "description": "Zero-code OpenTelemetry tracing for ABC Digital Node services: load with node --import, set OTEL_* env vars.",
+  "license": "UNLICENSED",
+  "author": "group:abcdigital/developers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devops-abcdigital/abc-observability.git",
+    "directory": "packages/node"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./register": "./dist/register.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "verify:type": "tsc --noEmit -p tsconfig.json",
+    "verify:lint": "eslint --max-warnings=0 --cache --cache-location .cache/eslint \"{src,test}/**/*.ts\"",
+    "verify:format": "prettier --check \"{src,test}/**/*.ts\" README.md",
+    "verify": "npm run verify:type && npm run verify:lint && npm run verify:format",
+    "fix:lint": "eslint --cache --cache-location .cache/eslint \"{src,test}/**/*.ts\" --fix",
+    "fix:format": "prettier --write \"{src,test}/**/*.ts\" README.md",
+    "fix": "npm run fix:lint && npm run fix:format",
+    "test": "npm run build && vitest run"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": ">=1.10.0 <1.11.0"
+  },
+  "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.83.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.301.0",
+    "@opentelemetry/instrumentation": "^0.301.0",
+    "@opentelemetry/sdk-node": "^0.301.0"
+  },
+  "devDependencies": {
+    "@opentelemetry/api": "~1.10.0",
+    "@opentelemetry/context-async-hooks": "^3.1.0",
+    "@opentelemetry/sdk-trace": "^3.1.0",
+    "@types/express": "^5.0.6",
+    "express": "^5.3.0"
+  }
+}
