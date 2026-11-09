@@ -1,13 +1,15 @@
 ---
 phase: 4
 title: "Phase 4: Teams Error Alerts"
-status: todo
+status: in-progress
 priority: P2
 effort: "0.5d"
 dependencies: [3]
 ---
 
 # Phase 4: Teams Error Alerts
+
+<!-- 2026-11-09: rules use Tempo span metrics (TraceQL metrics cannot feed Grafana 12.1 alerts because of exemplar frames). Verified on grafana/otel-lgtm (Grafana 12.1.1, Tempo 2.8.2) with a local stand-in for the Teams webhook: FIRING for request and job errors, RESOLVED ~6 min later, committed YAML loads via file provisioning. Remaining on the shared Grafana: DevOps prerequisites (metrics-generator span metrics + deployment.environment dimension), Teams Workflow, contact point, policy, rules, real FIRING/RESOLVED test. Full guide: docs/alerts.md. -->
 
 <!-- Updated: Validation Session 1 - Alloy migration removed from scope; one shared Teams channel; alerts cover failed requests and failed background jobs -->
 
@@ -64,7 +66,7 @@ Kênh Teams cảnh báo chung
 - [ ] Xác nhận TraceQL metrics + quyền trên Grafana
 - [ ] Workflow Teams + contact point + notification policy
 - [ ] Rule cảnh báo, kiểm chứng truy vấn trên Tempo thật
-- [ ] `alerts/server-errors.yaml`, `teams-message.tmpl`, `alerts/README.md`
+- [x] `alerts/server-errors.yaml`, `teams-message.tmpl`, `alerts/README.md`
 - [ ] Kiểm thử FIRING/RESOLVED cho request lỗi
 - [ ] Kiểm thử FIRING/RESOLVED cho job lỗi
 

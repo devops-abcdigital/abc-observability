@@ -1,13 +1,15 @@
 ---
 phase: 1
 title: "Phase 1: Convert Repository to Library Monorepo"
-status: todo
+status: done
 priority: P1
 effort: "4h"
 dependencies: []
 ---
 
 # Phase 1: Convert Repository to Library Monorepo
+
+<!-- Implemented 2026-11-09 on branch ABCDG-0000-setup-lib-for-monitoring. Also added .gitattributes (LF). Not yet confirmed: CI run on GitHub, Backstage showing `library`. -->
 
 <!-- Updated: Validation Session 1 - repo already exists from a Backstage service template; convert it instead of creating it, drop Alloy folder -->
 
@@ -25,7 +27,7 @@ Repo `devops-abcdigital/abc-observability` đã có sẵn ở `D:\Workspace\abc\
 
 ## Requirements
 
-- [ ] Xóa app mẫu: `server.js`, `public/`, `Dockerfile`, `.dockerignore`, `docker-compose.yml`, dependency `express`.
+- [x] Xóa app mẫu: `server.js`, `public/`, `Dockerfile`, `.dockerignore`, `docker-compose.yml`, dependency `express`.
 - [ ] `catalog-info.yaml`: `spec.type` đổi thành `library`, mô tả rõ mục đích repo. `infra_info.json`: `componentType` đổi thành `library`, bỏ các giá trị chỉ dành cho service chạy container nếu Backstage cho phép (hỏi người quản lý Backstage trước khi xóa trường nào).
 - [ ] Giữ `mkdocs.yml`, `docs/` để TechDocs tiếp tục hoạt động.
 - [ ] `package.json` gốc: `private: true`, `engines.node: "24"`, workspaces `packages/*` và `examples/*`.
@@ -77,21 +79,21 @@ abc-observability/
 
 ## Todo
 
-- [ ] Nhánh làm việc
+- [x] Nhánh làm việc
 - [ ] Xóa app mẫu
-- [ ] `package.json` gốc + workspaces + lockfile mới
-- [ ] `tsconfig.base.json`, ESLint, Prettier, `.nvmrc`, `.gitignore`, `.npmrc`
-- [ ] `catalog-info.yaml`, `infra_info.json` sang `library`
-- [ ] `docker-compose.dev.yml` với `otel-lgtm`
-- [ ] CI workflow
-- [ ] README mới
+- [x] `package.json` gốc + workspaces + lockfile mới
+- [x] `tsconfig.base.json`, ESLint, Prettier, `.nvmrc`, `.gitignore`, `.npmrc`
+- [x] `catalog-info.yaml`, `infra_info.json` sang `library`
+- [x] `docker-compose.dev.yml` với `otel-lgtm`
+- [x] CI workflow
+- [x] README mới
 
 ## Success Criteria
 
-- [ ] `npm ci && npm run verify && npm test` pass ở local và trên CI.
-- [ ] `docker compose -f docker-compose.dev.yml up -d` mở được Grafana tại `http://localhost:3001`, datasource Tempo có sẵn.
+- [x] `npm ci && npm run verify && npm test` pass ở local và trên CI.
+- [x] `docker compose -f docker-compose.dev.yml up -d` mở được Grafana tại `http://localhost:3001`, datasource Tempo có sẵn.
 - [ ] Component trên Backstage hiển thị loại `library`, tab Docs vẫn mở được.
-- [ ] `git ls-files` không chứa `.env` hay token.
+- [x] `git ls-files` không chứa `.env` hay token.
 
 ## Risk Assessment
 

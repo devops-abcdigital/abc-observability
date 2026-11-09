@@ -1,13 +1,15 @@
 ---
 phase: 5
 title: "Phase 5: Adopt in awp-product-hub"
-status: todo
+status: in-progress
 priority: P1
 effort: "0.5d"
 dependencies: [3]
 ---
 
 # Phase 5: Adopt in awp-product-hub
+
+<!-- 2026-11-09: code on branch ABCDG-0000-setup-tracing (uncommitted), verified with a locally packed tarball installed with --no-save. Unit 229 + 155 and e2e 143 tests pass. Remaining after 0.1.0 is published: add `@devops-abcdigital/observability-node@^0.1.0` + `@opentelemetry/api` to be/package.json and lockfile, full image build + container health without OTEL_*, staging Jenkinsfile secret. External call span: fetch client spans verified via hrm-sync e2e; GA4 gRPC not exercised (test uses a fake client). -->
 
 <!-- Updated: Validation Session 1 - local otel-lgtm verification only; wrap background connector syncs as job spans so job errors are alertable -->
 
@@ -33,7 +35,7 @@ Cài `@devops-abcdigital/observability-node@0.1.0` vào backend của repo **awp
 
 - [ ] `be/package.json` có `@devops-abcdigital/observability-node` (`^0.1.0`) và `@opentelemetry/api` (peer).
 - [ ] `.npmrc` ở gốc repo chỉ chứa dòng registry của scope `@devops-abcdigital`.
-- [ ] `docker-entrypoint.sh` chạy API bằng `node --import @devops-abcdigital/observability-node/register dist/main`.
+- [x] `docker-entrypoint.sh` chạy API bằng `node --import @devops-abcdigital/observability-node/register dist/main`.
 - [ ] Dockerfile cài được package private bằng BuildKit secret `npmrc`; image cuối không chứa token.
 - [ ] `README.md` ghi cách truyền token `read:packages` khi build image cho cả ba nơi:
   - **Máy dev:** `docker build --secret id=npmrc,src=$HOME/.npmrc .`
@@ -87,23 +89,23 @@ job.connector.sync  (connector.type=ga4, project.id=…, trigger=scheduled)
 
 ## Todo
 
-- [ ] Nhánh mới từ `main`
+- [x] Nhánh mới từ `main`
 - [ ] `.npmrc` + cài package
-- [ ] Bọc job trong `tick()` và `onProjectConnectorsSaved()`
-- [ ] `markSpanError` trong `ConnectorSyncRun.read()`
-- [ ] Unit test: job lỗi vẫn được log như cũ; không có `OTEL_*` thì sync chạy bình thường
+- [x] Bọc job trong `tick()` và `onProjectConnectorsSaved()`
+- [x] `markSpanError` trong `ConnectorSyncRun.read()`
+- [x] Unit test: job lỗi vẫn được log như cũ; không có `OTEL_*` thì sync chạy bình thường
 - [ ] `docker-entrypoint.sh`
-- [ ] Dockerfile dùng BuildKit secret
-- [ ] `infra_info.json` + `README.md`
-- [ ] Kiểm chứng trace: span HTTP → controller NestJS → truy vấn `pg`
+- [x] Dockerfile dùng BuildKit secret
+- [x] `infra_info.json` + `README.md`
+- [x] Kiểm chứng trace: span HTTP → controller NestJS → truy vấn `pg`
 - [ ] Kiểm chứng trace: span gọi ra ngoài (fetch hoặc gRPC tới GA4)
-- [ ] Kiểm chứng: span `job.connector.sync` có status ERROR khi provider lỗi, OK khi thành công
-- [ ] Kiểm chứng: `/api/v1/health` không sinh span
-- [ ] Kiểm chứng: log của `nestjs-pino` có `trace_id` khớp với trace
+- [x] Kiểm chứng: span `job.connector.sync` có status ERROR khi provider lỗi, OK khi thành công
+- [x] Kiểm chứng: `/api/v1/health` không sinh span
+- [x] Kiểm chứng: log của `nestjs-pino` có `trace_id` khớp với trace
 - [ ] Kiểm chứng: không đặt `OTEL_*` thì không có kết nối nào tới 4318 và app chạy bình thường
 - [ ] `npm run verify && npm test` (gốc repo) pass, `npm run test:e2e -w be` pass
 - [ ] `docker build --secret id=npmrc,...` thành công trên máy dev; `docker history` không lộ token
-- [ ] `README.md` có hướng dẫn truyền token cho Jenkins và GitHub Actions
+- [x] `README.md` có hướng dẫn truyền token cho Jenkins và GitHub Actions
 
 ## Success Criteria
 

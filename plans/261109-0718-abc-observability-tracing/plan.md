@@ -1,7 +1,7 @@
 ---
 title: "abc-observability: thư viện tracing dùng chung"
 description: "Chuyển repo abc-observability thành thư viện OpenTelemetry cho Node chỉ xuất traces, cảnh báo lỗi request và job vào Teams, và áp dụng đầu tiên cho awp-product-hub."
-status: pending
+status: in-progress
 priority: P1
 effort: 4d
 branch: main
@@ -27,11 +27,11 @@ Repo `devops-abcdigital/abc-observability` (`D:\Workspace\abc\abc-observability`
 
 | # | Phase | Status |
 |---|-------|--------|
-| 1 | [Convert Repository to Library Monorepo](./phase-01-start.md) | Pending |
-| 2 | [Node Tracing Library](./phase-02-node-tracing-library.md) | Pending |
-| 3 | [Examples, Docs and Release](./phase-03-examples-docs-and-release.md) | Pending |
-| 4 | [Teams Error Alerts](./phase-04-teams-error-alerts.md) | Pending |
-| 5 | [Adopt in awp-product-hub](./phase-05-adopt-in-awp-product-hub.md) | Pending |
+| 1 | [Convert Repository to Library Monorepo](./phase-01-start.md) | Xong (chưa xác nhận Backstage hiển thị `library` và CI chạy trên GitHub) |
+| 2 | [Node Tracing Library](./phase-02-node-tracing-library.md) | Xong |
+| 3 | [Examples, Docs and Release](./phase-03-examples-docs-and-release.md) | Đang làm: chờ người release publish `0.1.0` |
+| 4 | [Teams Error Alerts](./phase-04-teams-error-alerts.md) | Phần repo xong, đã kiểm chứng trên otel-lgtm; chờ cài trên Grafana chung + Teams |
+| 5 | [Adopt in awp-product-hub](./phase-05-adopt-in-awp-product-hub.md) | Đang làm: code xong trên nhánh `ABCDG-0000-setup-tracing`, chờ `0.1.0` để thêm dependency |
 
 Phụ thuộc: 1 → 2 → 3, sau đó phase 4 và 5 làm song song được (cả hai chỉ cần phase 3).
 
@@ -146,5 +146,14 @@ Phụ thuộc: 1 → 2 → 3, sau đó phase 4 và 5 làm song song được (c�
 - Decision deltas checked: 3
 - Reconciled stale references: 3 (`release.yml`, luồng changesets/action, giả định CI build image chỉ là GitHub Actions)
 - Unresolved contradictions: 0
+
+### Triển khai — 2026-11-09
+
+Quyết định phát sinh khi làm (bằng chứng trong từng phase):
+- **Cảnh báo dùng span metrics của Tempo (`traces_spanmetrics_calls_total`), không dùng truy vấn TraceQL metrics.** TraceQL metrics chạy được trong Explore, nhưng Grafana 12.1 alerting từ chối frame exemplar đi kèm (`input data must be a wide series but got type long`) và Tempo 2.8 bỏ qua `exemplars=0`. Plan đã ghi span metrics là phương án dự phòng. TraceQL vẫn dùng trong link Explore của tin cảnh báo. Cách escape `"job\\..*"` trong plan là TraceQL không hợp lệ; `"job[.].*"` chạy được.
+- **Tắt `@opentelemetry/instrumentation-router`**: Express 5 (và NestJS 11) đi qua package `router`, nên instrumentation này nhân đôi mọi span handler.
+- **Flush span cả khi process tự kết thúc (`beforeExit`)**, không chỉ SIGTERM/SIGINT: process ngắn bị mất các span cuối (thấy khi kiểm chứng awp).
+- OTel dùng dòng 0.301 / SDK 3.x (`sdk-trace-base` đã gộp vào `@opentelemetry/sdk-trace`); peer `@opentelemetry/api` là `>=1.10.0 <1.11.0`.
+- awp-product-hub **có** pipeline Jenkins staging (`jenkins/staging/Jenkinsfile` trên các nhánh `CP-*`) chạy `docker build` trơn; phải truyền secret `npmrc` khi thêm dependency.
 
 <!-- slug: abc-observability-tracing -->

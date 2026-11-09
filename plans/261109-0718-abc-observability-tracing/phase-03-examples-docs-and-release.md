@@ -1,13 +1,15 @@
 ---
 phase: 3
 title: "Phase 3: Examples, Docs and Release"
-status: todo
+status: in-progress
 priority: P1
 effort: "1d"
 dependencies: [2]
 ---
 
 # Phase 3: Examples, Docs and Release
+
+<!-- 2026-11-09: everything up to publishing is done. Guards tested in a scratch clone (branch, dirty tree, ahead of origin, no changeset, no token, Node version); dry run passes past the token check when login is stubbed. Remaining: `npm run release -- --dry-run` with a real token, publish 0.1.0 (maintainer, needs write:packages token and merge to main), install test, screenshot (trace verified through the Tempo API instead). -->
 
 <!-- Updated: Validation Session 2 - first releases run from a maintainer machine through a guarded release script; CI pipeline (GitHub Actions or Jenkins) deferred until DevOps confirms -->
 
@@ -29,7 +31,7 @@ Thêm app mẫu chứng minh trace xuyên nhiều service, viết tài liệu t�
 - [ ] Ít nhất một service mẫu có job bọc bằng `withSpan('job.example.cleanup', …)` và một đường lỗi dùng `markSpanError`.
 - [ ] `docs/getting-started.md`: tích hợp trong 3 bước (cài, `--import`, biến môi trường), cách cấu hình `.npmrc`/token `read:packages`, cách test bằng `otel-lgtm`, cách chuyển sang Alloy.
 - [ ] `docs/conventions.md`: đặt tên `service.name` (`<du-an>-<thanh-phan>`, hậu tố `-local` khi chạy máy dev), giá trị `deployment.environment`, quy tắc đặt tên span và attribute, **span job chạy nền đặt tên `job.<khu-vuc>.<viec>`** (cảnh báo Teams ở phase 4 dựa vào tiền tố này), danh sách dữ liệu cấm đưa vào span.
-- [ ] `docs/releasing.md`: ai được release, cách tạo token `write:packages`, cách chạy `npm run release`, xử lý khi publish lỗi giữa chừng.
+- [x] `docs/releasing.md`: ai được release, cách tạo token `write:packages`, cách chạy `npm run release`, xử lý khi publish lỗi giữa chừng.
 - [ ] Thêm `getting-started.md`, `conventions.md`, `releasing.md` vào `nav` của `mkdocs.yml` để hiện trên tab Docs của Backstage.
 - [ ] Changesets quản lý version và CHANGELOG: mỗi PR thay đổi package phải kèm `.changeset/*.md`.
 - [ ] `npm run release` (file `scripts/release.mjs`) **dừng và không publish** nếu một trong các điều kiện sau sai:
@@ -89,21 +91,21 @@ Về sau (ngoài phạm vi phase này): GitHub Actions hoặc Jenkins chạy đ�
 
 ## Todo
 
-- [ ] 3 service mẫu + job mẫu + compose
+- [x] 3 service mẫu + job mẫu + compose
 - [ ] Kiểm chứng trace xuyên 3 service trên Grafana local (chụp ảnh đưa vào docs)
-- [ ] `docs/getting-started.md`, `docs/conventions.md`, `mkdocs.yml`
-- [ ] changesets
-- [ ] `scripts/release.mjs` + script `release` trong `package.json`
-- [ ] Kiểm thử từng điều kiện chặn: sai nhánh, có thay đổi chưa commit, lệch `origin/main`, không có changeset, token sai → script dừng, không publish
+- [x] `docs/getting-started.md`, `docs/conventions.md`, `mkdocs.yml`
+- [x] changesets
+- [x] `scripts/release.mjs` + script `release` trong `package.json`
+- [x] Kiểm thử từng điều kiện chặn: sai nhánh, có thay đổi chưa commit, lệch `origin/main`, không có changeset, token sai → script dừng, không publish
 - [ ] `npm run release -- --dry-run` pass
 - [ ] `docs/releasing.md`
 - [ ] Publish `0.1.0`, có git tag và GitHub Release, cài thử từ registry
 
 ## Success Criteria
 
-- [ ] Một request `/login?id=broken` cho ra **một** trace có span của cả `gateway`, `auth`, `users`; span `users` có status ERROR và exception.
+- [x] Một request `/login?id=broken` cho ra **một** trace có span của cả `gateway`, `auth`, `users`; span `users` có status ERROR và exception.
 - [ ] `npm view @devops-abcdigital/observability-node version --registry=https://npm.pkg.github.com` trả về `0.1.0`; có tag `@devops-abcdigital/observability-node@0.1.0` và GitHub Release tương ứng.
-- [ ] Mỗi điều kiện chặn ở Requirements khi sai đều làm script dừng trước bước publish.
+- [x] Mỗi điều kiện chặn ở Requirements khi sai đều làm script dừng trước bước publish.
 - [ ] Người chưa tham gia dự án làm theo `getting-started.md` tích hợp được vào một app Express trống.
 
 ## Risk Assessment

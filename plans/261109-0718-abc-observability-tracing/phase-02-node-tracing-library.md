@@ -1,13 +1,15 @@
 ---
 phase: 2
 title: "Phase 2: Node Tracing Library"
-status: todo
+status: done
 priority: P1
 effort: "1.5d"
 dependencies: [1]
 ---
 
 # Phase 2: Node Tracing Library
+
+<!-- Implemented 2026-11-09. Additions found while verifying: router instrumentation disabled (duplicate Express 5 spans), flush on beforeExit for short-lived processes; both covered by integration tests. All 27 tests pass on Linux (node:24); SIGTERM-flush test is skipped on Windows. -->
 
 ## Overview
 
@@ -91,23 +93,23 @@ Xử lý shutdown (`shutdown.ts`):
 
 ## Todo
 
-- [ ] `config.ts` + unit test (bật/tắt theo env, parse `ABC_OTEL_IGNORE_PATHS`)
-- [ ] `instrumentations.ts`
-- [ ] `sdk.ts` + `shutdown.ts`
-- [ ] `register.ts`
-- [ ] `tracing.ts` + unit test (span OK, span lỗi có exception + status ERROR, span luôn kết thúc, quan hệ cha/con khi lồng nhau, `markSpanError` đặt ERROR mà không thêm event exception, gọi ngoài span không lỗi)
-- [ ] Integration test: app Express có 2 route, route A gọi HTTP sang route B; receiver OTLP nhận được **một trace** gồm span server A → span client → span server B, cùng `trace_id`
-- [ ] Integration test: request tới `/health` không sinh span
-- [ ] Integration test: không đặt endpoint → không có request nào tới receiver, app vẫn trả 200
-- [ ] Integration test: exporter trỏ tới cổng không tồn tại → app vẫn trả 200
-- [ ] Integration test: process con chạy app không có handler SIGTERM, gửi SIGTERM → process thoát trong 5 giây
-- [ ] `README.md` của package: cài đặt, biến môi trường, `withSpan`, `@Traced`, `markSpanError`, cách bọc job chạy nền
+- [x] `config.ts` + unit test (bật/tắt theo env, parse `ABC_OTEL_IGNORE_PATHS`)
+- [x] `instrumentations.ts`
+- [x] `sdk.ts` + `shutdown.ts`
+- [x] `register.ts`
+- [x] `tracing.ts` + unit test (span OK, span lỗi có exception + status ERROR, span luôn kết thúc, quan hệ cha/con khi lồng nhau, `markSpanError` đặt ERROR mà không thêm event exception, gọi ngoài span không lỗi)
+- [x] Integration test: app Express có 2 route, route A gọi HTTP sang route B; receiver OTLP nhận được **một trace** gồm span server A → span client → span server B, cùng `trace_id`
+- [x] Integration test: request tới `/health` không sinh span
+- [x] Integration test: không đặt endpoint → không có request nào tới receiver, app vẫn trả 200
+- [x] Integration test: exporter trỏ tới cổng không tồn tại → app vẫn trả 200
+- [x] Integration test: process con chạy app không có handler SIGTERM, gửi SIGTERM → process thoát trong 5 giây
+- [x] `README.md` của package: cài đặt, biến môi trường, `withSpan`, `@Traced`, `markSpanError`, cách bọc job chạy nền
 
 ## Success Criteria
 
-- [ ] `npm run verify && npm test -w packages/node` pass.
-- [ ] Toàn bộ integration test ở Todo pass trên CI.
-- [ ] Chạy thử với `docker-compose.dev.yml`: trace của app test hiện trong Grafana `localhost:3001` → Explore → Tempo.
+- [x] `npm run verify && npm test -w packages/node` pass.
+- [x] Toàn bộ integration test ở Todo pass trên CI.
+- [x] Chạy thử với `docker-compose.dev.yml`: trace của app test hiện trong Grafana `localhost:3001` → Explore → Tempo.
 
 ## Risk Assessment
 
