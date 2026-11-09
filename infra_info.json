@@ -3,7 +3,7 @@
   "projectName": "abc-observability",
   "entityRef": "component:abcdigital/abc-observability",
   "owner": "group:abcdigital/developers",
-  "componentType": "service",
+  "componentType": "library",
   "system": "system:abcdigital/abc-observability",
   "repository": "devops-abcdigital/abc-observability",
   "sourceUrl": "https://github.com/devops-abcdigital/abc-observability",
