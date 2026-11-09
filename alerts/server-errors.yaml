@@ -1,0 +1,100 @@
+# Shared error alerts: failed requests and failed background jobs, per service and environment.
+# Grafana alerting provisioning format (exported from Grafana 12.1 and tested against grafana/otel-lgtm).
+#
+# Source: Tempo metrics-generator span metrics (`traces_spanmetrics_calls_total`) in the Prometheus/Mimir data
+# source. Before installing, replace the two placeholders below with the data source UIDs of the target Grafana:
+#   PROMETHEUS_DS_UID  Prometheus/Mimir data source that receives Tempo span metrics
+#   TEMPO_DS_UID       Tempo data source (used only for the "open failing traces" link)
+# Setup steps and the reasons behind each choice: alerts/README.md
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: abc-observability-errors
+    folder: Observability
+    interval: 1m
+    rules:
+      - uid: abc-obs-request-errors
+        title: Failed requests
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PROMETHEUS_DS_UID
+            model:
+              expr: sum by (service, deployment_environment) (increase(traces_spanmetrics_calls_total{status_code="STATUS_CODE_ERROR", span_kind="SPAN_KIND_SERVER"}[5m]))
+              instant: true
+              range: false
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 10
+                    type: gt
+              expression: B
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        annotations:
+          summary: More than 10 failed requests (server spans with status ERROR) in 5 minutes.
+          explore_url: '{{ externalURL }}explore?schemaVersion=1&orgId=1&panes={{ printf `%s%s%s` `{"a":{"datasource":"TEMPO_DS_UID","queries":[{"refId":"A","datasource":{"type":"tempo","uid":"TEMPO_DS_UID"},"queryType":"traceql","query":"{ resource.service.name = \"` .Labels.service `\" && status = error && kind = server }"}],"range":{"from":"now-1h","to":"now"}}}` | urlquery }}'
+        labels:
+          error_kind: request
+          notify: abc-observability-teams
+        isPaused: false
+
+      - uid: abc-obs-job-errors
+        title: Failed background jobs
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PROMETHEUS_DS_UID
+            model:
+              expr: sum by (service, deployment_environment) (increase(traces_spanmetrics_calls_total{status_code="STATUS_CODE_ERROR", span_name=~"job\\..*"}[5m]))
+              instant: true
+              range: false
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              expression: A
+              reducer: last
+              refId: B
+              type: reduce
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 3
+                    type: gt
+              expression: B
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        annotations:
+          summary: More than 3 failed background job runs (job.* spans with status ERROR) in 5 minutes.
+          explore_url: '{{ externalURL }}explore?schemaVersion=1&orgId=1&panes={{ printf `%s%s%s` `{"a":{"datasource":"TEMPO_DS_UID","queries":[{"refId":"A","datasource":{"type":"tempo","uid":"TEMPO_DS_UID"},"queryType":"traceql","query":"{ resource.service.name = \"` .Labels.service `\" && status = error && name =~ \"job[.].*\" }"}],"range":{"from":"now-1h","to":"now"}}}` | urlquery }}'
+        labels:
+          error_kind: job
+          notify: abc-observability-teams
+        isPaused: false

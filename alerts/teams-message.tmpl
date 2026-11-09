@@ -1,0 +1,30 @@
+{{/*
+  Microsoft Teams message for the shared error alerts (alerts/server-errors.yaml).
+  Install as a notification template named "abc-observability-teams" and reference it from the
+  Teams contact point: Title  {{ template "abc.teams.title" . }}
+                       Message {{ template "abc.teams.message" . }}
+  Only service, environment, error kind, count and a link are sent: never exception text.
+*/}}
+
+{{ define "abc.teams.title" -}}
+{{ if eq .Status "firing" }}🔴 FIRING{{ else }}✅ RESOLVED{{ end }}: {{ .CommonLabels.alertname }} · {{ .CommonLabels.service }} ({{ or .CommonLabels.deployment_environment "unknown env" }})
+{{- end }}
+
+{{ define "abc.teams.message" -}}
+{{ range .Alerts -}}
+**Service:** {{ .Labels.service }}
+
+**Environment:** {{ or .Labels.deployment_environment "unknown" }}
+
+**Kind:** {{ if eq .Labels.error_kind "job" }}background job (`job.*` spans){{ else }}request (server spans){{ end }}
+
+{{ if eq .Status "firing" -}}
+**Errors in the last 5 minutes:** {{ with .Values.B }}{{ printf "%.0f" . }}{{ end }}
+{{- else -}}
+**Resolved:** error count is back under the threshold.
+{{- end }}
+
+{{ with .Annotations.explore_url }}[Open failing traces in Grafana]({{ . }}){{ end }}
+
+{{ end -}}
+{{- end }}
