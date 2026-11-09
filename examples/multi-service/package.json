@@ -1,0 +1,20 @@
+{
+  "name": "@abc-observability-examples/multi-service",
+  "private": true,
+  "description": "Three services (gateway -> auth -> users) showing one trace across services, a failing service and a background job.",
+  "type": "module",
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "verify:lint": "eslint --max-warnings=0 \"src/**/*.mjs\"",
+    "verify:format": "prettier --check \"src/**/*.mjs\" README.md docker-compose.yml",
+    "verify": "npm run verify:lint && npm run verify:format",
+    "fix": "eslint --fix \"src/**/*.mjs\" && prettier --write \"src/**/*.mjs\" README.md docker-compose.yml"
+  },
+  "dependencies": {
+    "@devops-abcdigital/observability-node": "*",
+    "@opentelemetry/api": "~1.10.0",
+    "express": "^5.3.0"
+  }
+}
