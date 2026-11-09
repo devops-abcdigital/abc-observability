@@ -1,0 +1,6 @@
+site_name: "abc-observability"
+docs_dir: docs
+nav:
+  - Backstage Catalog & TechDocs Guide: index.md
+plugins:
+  - techdocs-core

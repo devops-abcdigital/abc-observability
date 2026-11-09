@@ -1,0 +1,17 @@
+{
+  "name": "abc-observability",
+  "version": "1.0.0",
+  "description": "abc-observability",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [],
+  "author": "group:abcdigital/developers",
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "license": "UNLICENSED"
+}

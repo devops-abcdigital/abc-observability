@@ -1,0 +1,12 @@
+services:
+  app:
+    image: 'ghcr.io/devops-abcdigital/abc-observability:${IMAGE_TAG:-latest}'
+    build: .
+    restart: unless-stopped
+    ports:
+      - '${HOST_PORT:-3000}:3000'
+    environment:
+      PROJECT_NAME: 'abc-observability'
+      PORT: '3000'
+    cpus: 0.5
+    mem_limit: 1g

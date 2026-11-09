@@ -1,0 +1,38 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: abcdigital
+  name: "abc-observability"
+  description: "abc-observability"
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: devops-abcdigital/abc-observability
+    backstage.io/source-location: url:https://github.com/devops-abcdigital/abc-observability/tree/main/
+    abc.io/infra-info-path: infra_info.json
+
+  links:
+    - url: https://github.com/devops-abcdigital/abc-observability
+      title: Source Code
+      icon: github
+    - url: https://github.com/devops-abcdigital/abc-observability/blob/main/infra_info.json
+      title: Infrastructure Info
+      icon: docs
+spec:
+  type: "service"
+  lifecycle: experimental
+  owner: "group:abcdigital/developers"
+
+
+  system: "system:abcdigital/abc-observability"
+
+
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: "abc-observability"
+  namespace: "abcdigital"
+spec:
+  owner: "group:abcdigital/developers"
+
