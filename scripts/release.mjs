@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Guarded release: the single source of truth for releasing packages from this repo.
-// A future CI pipeline (GitHub Actions or Jenkins) must call `npm run release` instead of copying these steps.
+// The Release workflow (.github/workflows/release.yml) calls `npm run release`; any other pipeline must do the same
+// instead of copying these steps.
 //
 //   npm run release             check, version, commit, publish, tag, push, GitHub Release
 //   npm run release -- --dry-run   run every check plus `npm publish --dry-run`; no commit, no push
@@ -89,6 +90,14 @@ function checkHasChangeset() {
 }
 
 function checkRegistryLogin() {
+  // In the Release workflow the token is the job's GITHUB_TOKEN (packages: write), which is not a user account,
+  // so `npm whoami` cannot vouch for it; checking it is present is all that can be done before publishing.
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    if (!process.env.NODE_AUTH_TOKEN)
+      throw new ReleaseError('NODE_AUTH_TOKEN is not set: the workflow must pass secrets.GITHUB_TOKEN.');
+    process.stdout.write(`  publishing to ${REGISTRY} with the workflow token\n`);
+    return;
+  }
   try {
     const user = npm(['whoami', `--registry=${REGISTRY}`], { capture: true }).trim();
     process.stdout.write(`  logged in to ${REGISTRY} as ${user}\n`);
@@ -170,7 +179,7 @@ const CHECKS = [
   ['working tree is clean', checkCleanTree],
   [`in sync with ${REMOTE}/${RELEASE_BRANCH}`, checkInSyncWithRemote],
   ['pending changeset exists', checkHasChangeset],
-  ['registry token is valid', checkRegistryLogin],
+  ['registry token is available', checkRegistryLogin],
   ['verify, test and build pass', checkQualityGates],
 ];
 
