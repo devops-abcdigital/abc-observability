@@ -8,13 +8,17 @@ calls one guarded script, `npm run release`
 
 ## One-time setup (npm organization owner)
 
+The Release workflow publishes through npm **trusted publishing** (OIDC): npmjs.com trusts this repository's
+workflow, so no npm token exists anywhere. npm is retiring tokens that bypass 2FA for publishing, so do not add one.
+
 1. The npm organization `devops-abcdigital` exists on npmjs.com (free plan, public packages). Keep at least two
    owners so it never depends on one account; every owner has 2FA on.
-2. An owner creates a **Granular Access Token** on npmjs.com: **Read and write** on the `@devops-abcdigital` scope,
-   expiry 90 days, with **Bypass two-factor authentication** ticked (otherwise CI publishing asks for a one-time
-   code).
-3. Store it as the repository secret `NPM_TOKEN` (GitHub → repository **Settings** → **Secrets and variables** →
-   **Actions**). Record its expiry next to the release owners below and renew it before then.
+2. A package must exist before trusted publishing can be configured, so a new package's first version is published
+   once from a release owner's machine (see [fallback](#cut-a-release-from-your-machine-fallback)).
+3. On npmjs.com → the package → **Settings** → **Trusted publishing**, add a **GitHub Actions** publisher:
+   organization `devops-abcdigital`, repository `abc-observability`, workflow `release.yml`, environment `release`.
+4. Optionally, in the same settings, set **Publishing access** to "Require two-factor authentication and disallow
+   tokens", so only the workflow (or a person with 2FA) can publish.
 
 ## Release owners
 
@@ -68,15 +72,15 @@ npm run release
 
 Both routes run the same script. It stops **before publishing** if any check fails:
 
-| Check                                                               | Fix                                                 |
-| ------------------------------------------------------------------- | --------------------------------------------------- |
-| Node major matches `engines` (24)                                   | `nvm use`                                           |
-| current branch is `main`                                            | `git checkout main`                                 |
-| no uncommitted changes                                              | commit or stash                                     |
-| `main` equals `origin/main` after fetch                             | `git pull` (or push your local commits via a PR)    |
-| at least one pending changeset                                      | nothing to release, or add one with `npx changeset` |
-| registry login: `npm whoami` works (on Actions: `NPM_TOKEN` is set) | `npm login`, or renew the `NPM_TOKEN` secret        |
-| `npm run verify`, `npm test`, `npm run build` pass                  | fix the failure on `main` first                     |
+| Check                                                                          | Fix                                                 |
+| ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Node major matches `engines` (24)                                              | `nvm use`                                           |
+| current branch is `main`                                                       | `git checkout main`                                 |
+| no uncommitted changes                                                         | commit or stash                                     |
+| `main` equals `origin/main` after fetch                                        | `git pull` (or push your local commits via a PR)    |
+| at least one pending changeset                                                 | nothing to release, or add one with `npx changeset` |
+| registry login: `npm whoami` works (on Actions: the job has `id-token: write`) | `npm login`, or fix the workflow permissions        |
+| `npm run verify`, `npm test`, `npm run build` pass                             | fix the failure on `main` first                     |
 
 When every check passes it runs, in order:
 

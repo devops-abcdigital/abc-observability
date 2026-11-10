@@ -90,11 +90,11 @@ function checkHasChangeset() {
 }
 
 function checkRegistryLogin() {
-  // In the Release workflow the token is the repository secret NPM_TOKEN; it must be present before publishing.
+  // In the Release workflow npm publishes through trusted publishing (OIDC), which needs the job's id-token permission.
   if (process.env.GITHUB_ACTIONS === 'true') {
-    if (!process.env.NODE_AUTH_TOKEN)
-      throw new ReleaseError('NODE_AUTH_TOKEN is empty: add the NPM_TOKEN repository secret (see docs/releasing.md).');
-    process.stdout.write(`  publishing to ${REGISTRY} with the NPM_TOKEN secret\n`);
+    if (!process.env.ACTIONS_ID_TOKEN_REQUEST_URL)
+      throw new ReleaseError('No OIDC token: the Release workflow needs `permissions: id-token: write`.');
+    process.stdout.write(`  publishing to ${REGISTRY} through trusted publishing (OIDC)\n`);
     return;
   }
   try {

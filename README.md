@@ -57,5 +57,5 @@ Changes to `packages/*` need a changeset (`npx changeset`). Releases: see [docs/
 ## Backstage
 
 `catalog-info.yaml` registers this repository as a `library` component; `infra_info.json` holds its catalog metadata.
-Neither contains secrets, and none may be added: the npm publish token lives only in the `NPM_TOKEN` repository
-secret, and the Teams webhook URL only in Grafana's contact point.
+Neither contains secrets, and none may be added: npm publishing uses trusted publishing (no token), and the Teams
+webhook URL lives only in Grafana's contact point.
