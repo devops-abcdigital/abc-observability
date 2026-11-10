@@ -46,7 +46,7 @@ function attributeMap(attributes: OtlpAttribute[] = []): Record<string, unknown>
   return Object.fromEntries(attributes.map((a) => [a.key, Object.values(a.value)[0]]));
 }
 
-/** Minimal OTLP/HTTP JSON receiver standing in for Alloy/otel-lgtm. */
+/** Minimal OTLP/HTTP JSON receiver standing in for Alloy. */
 export async function startReceiver() {
   const spans: ReceivedSpan[] = [];
   let requestCount = 0;

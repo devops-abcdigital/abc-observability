@@ -18,7 +18,8 @@ The services use the library from this workspace, so no registry token is needed
 
 ## Run
 
-From the repository root:
+The services send traces to the shared Alloy (`http://alloy-shared:4318`) over the external `abc_telemetry_network`
+Docker network, so run the example on a server where DevOps runs `alloy-shared`. From the repository root:
 
 ```bash
 docker compose -f examples/multi-service/docker-compose.yml up -d --build
@@ -28,16 +29,16 @@ curl "http://localhost:8080/login?id=broken"        # fails inside users
 curl -X POST "http://localhost:8082/jobs/cleanup?fail=1"  # failed background job
 ```
 
-Open Grafana at <http://localhost:3001> → **Explore** → data source **Tempo** → **Search**, service name
-`example-gateway-local`. The `broken` request is a single trace with spans from all three services:
+Open Grafana at <https://agf.abcdigital.io> → **Explore** → data source **Tempo** → **Search**, service name
+`example-gateway`. The `broken` request is a single trace with spans from all three services:
 
 ```
-example-gateway-local  GET /login                   ERROR (answered 502)
-example-gateway-local    GET                        client call to auth
-example-auth-local         GET /token               ERROR (answered 502)
-example-auth-local           GET                    client call to users
-example-users-local            GET /users/:id       ERROR (answered 500)
-example-users-local              users.find         ERROR + exception "user record is corrupted"
+example-gateway  GET /login                   ERROR (answered 502)
+example-gateway    GET                        client call to auth
+example-auth         GET /token               ERROR (answered 502)
+example-auth           GET                    client call to users
+example-users            GET /users/:id       ERROR (answered 500)
+example-users              users.find         ERROR + exception "user record is corrupted"
 ```
 
 The deepest red span with an exception (`users.find`) is where the failure started; the red spans above it only
