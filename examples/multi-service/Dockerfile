@@ -3,7 +3,7 @@
 FROM node:24-slim
 
 WORKDIR /repo
-COPY package.json package-lock.json .npmrc tsconfig.base.json ./
+COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/node/package.json packages/node/
 COPY examples/multi-service/package.json examples/multi-service/
 RUN npm ci --no-audit --no-fund

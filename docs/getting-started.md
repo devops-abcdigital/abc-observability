@@ -5,36 +5,12 @@ Grafana (Tempo) and show which service called which, and at which step a request
 
 ## 1. Install
 
-The package is private on GitHub Packages, so npm needs to know the registry and have a token.
-
-**Project `.npmrc`** (commit this, registry only):
-
-```ini
-@devops-abcdigital:registry=https://npm.pkg.github.com
-```
-
-**Your `~/.npmrc`** (never commit this):
-
-```ini
-//npm.pkg.github.com/:_authToken=<token>
-```
-
-Create the token at GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens
-(classic)** with the `read:packages` scope, and authorize it for the `devops-abcdigital` organization (SSO) if
-asked. Check it with `npm whoami --registry=https://npm.pkg.github.com`.
+The package is public on [npmjs.com](https://www.npmjs.com/package/@devops-abcdigital/observability-node), so
+developer machines, Docker builds and CI install it like any other dependency: no token, no `.npmrc`, no build
+secret.
 
 ```bash
 npm install @devops-abcdigital/observability-node @opentelemetry/api
-```
-
-Docker builds need the same token; pass it as a BuildKit secret so it never lands in an image layer:
-
-```dockerfile
-RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
-```
-
-```bash
-docker build --secret id=npmrc,src=$HOME/.npmrc .
 ```
 
 ## 2. Load it with `--import`

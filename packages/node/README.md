@@ -6,19 +6,7 @@ Only traces are exported. Logs and metrics are not sent.
 
 ## Install
 
-The package lives on GitHub Packages. Add this line to the project's `.npmrc` (registry only, never a token):
-
-```ini
-@devops-abcdigital:registry=https://npm.pkg.github.com
-```
-
-Put a GitHub token with `read:packages` in your user-level `~/.npmrc`:
-
-```ini
-//npm.pkg.github.com/:_authToken=<your token>
-```
-
-Then install the library and its peer dependency:
+The package is public on npmjs.com, so no token or `.npmrc` is needed. Install the library and its peer dependency:
 
 ```bash
 npm install @devops-abcdigital/observability-node @opentelemetry/api

@@ -13,7 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REGISTRY = 'https://npm.pkg.github.com';
+const REGISTRY = 'https://registry.npmjs.org';
 const RELEASE_BRANCH = 'main';
 const REMOTE = 'origin';
 const RELEASE_COMMIT_MESSAGE = 'chore(release): version packages';
@@ -90,12 +90,11 @@ function checkHasChangeset() {
 }
 
 function checkRegistryLogin() {
-  // In the Release workflow the token is the job's GITHUB_TOKEN (packages: write), which is not a user account,
-  // so `npm whoami` cannot vouch for it; checking it is present is all that can be done before publishing.
+  // In the Release workflow the token is the repository secret NPM_TOKEN; it must be present before publishing.
   if (process.env.GITHUB_ACTIONS === 'true') {
     if (!process.env.NODE_AUTH_TOKEN)
-      throw new ReleaseError('NODE_AUTH_TOKEN is not set: the workflow must pass secrets.GITHUB_TOKEN.');
-    process.stdout.write(`  publishing to ${REGISTRY} with the workflow token\n`);
+      throw new ReleaseError('NODE_AUTH_TOKEN is empty: add the NPM_TOKEN repository secret (see docs/releasing.md).');
+    process.stdout.write(`  publishing to ${REGISTRY} with the NPM_TOKEN secret\n`);
     return;
   }
   try {
@@ -103,7 +102,7 @@ function checkRegistryLogin() {
     process.stdout.write(`  logged in to ${REGISTRY} as ${user}\n`);
   } catch {
     throw new ReleaseError(
-      `Not logged in to ${REGISTRY}. Put a token with write:packages in ~/.npmrc (see docs/releasing.md).`,
+      `Not logged in to ${REGISTRY}. Run \`npm login\` with an account that can publish to @devops-abcdigital.`,
     );
   }
 }
