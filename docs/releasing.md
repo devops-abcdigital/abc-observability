@@ -1,11 +1,24 @@
 # Releasing
 
-Packages are published to GitHub Packages (`https://npm.pkg.github.com`) under the `@devops-abcdigital` scope.
-Releases run on GitHub Actions through the
+Packages are published as **public** packages to npmjs.com under the `@devops-abcdigital` organization, so
+installing them needs no token. Releases run on GitHub Actions through the
 [Release workflow](https://github.com/devops-abcdigital/abc-observability/blob/main/.github/workflows/release.yml), which
 calls one guarded script, `npm run release`
-([`scripts/release.mjs`](https://github.com/devops-abcdigital/abc-observability/blob/main/scripts/release.mjs)). The
-workflow's own `GITHUB_TOKEN` publishes, so nobody needs a personal `write:packages` token.
+([`scripts/release.mjs`](https://github.com/devops-abcdigital/abc-observability/blob/main/scripts/release.mjs)).
+
+## One-time setup (npm organization owner)
+
+The Release workflow publishes through npm **trusted publishing** (OIDC): npmjs.com trusts this repository's
+workflow, so no npm token exists anywhere. npm is retiring tokens that bypass 2FA for publishing, so do not add one.
+
+1. The npm organization `devops-abcdigital` exists on npmjs.com (free plan, public packages). Keep at least two
+   owners so it never depends on one account; every owner has 2FA on.
+2. A package must exist before trusted publishing can be configured, so a new package's first version is published
+   once from a release owner's machine (see [fallback](#cut-a-release-from-your-machine-fallback)).
+3. On npmjs.com → the package → **Settings** → **Trusted publishing**, add a **GitHub Actions** publisher:
+   organization `devops-abcdigital`, repository `abc-observability`, workflow `release.yml`, environment `release`.
+4. Optionally, in the same settings, set **Publishing access** to "Require two-factor authentication and disallow
+   tokens", so only the workflow (or a person with 2FA) can publish.
 
 ## Release owners
 
@@ -41,17 +54,10 @@ The workflow needs `main` to accept pushes from GitHub Actions. If `main` gets b
 
 ### One-time setup
 
-1. Create a GitHub personal access token (classic) with the `write:packages` scope (it includes
-   `read:packages`). Authorize it for the `devops-abcdigital` organization if SSO asks.
-2. Put it in your user-level `~/.npmrc`, never in the repository:
-
-   ```ini
-   //npm.pkg.github.com/:_authToken=<token>
-   ```
-
-3. Check: `npm whoami --registry=https://npm.pkg.github.com` prints your GitHub username.
-4. Install and log in to the GitHub CLI (`gh auth login`); the script creates the GitHub Release with it.
-5. Use Node 24 (`nvm use`).
+1. Be a member of the `devops-abcdigital` npm organization with publish rights, and run `npm login`.
+2. Check: `npm whoami` prints your npm username.
+3. Install and log in to the GitHub CLI (`gh auth login`); the script creates the GitHub Release with it.
+4. Use Node 24 (`nvm use`).
 
 ### Run
 
@@ -66,15 +72,15 @@ npm run release
 
 Both routes run the same script. It stops **before publishing** if any check fails:
 
-| Check                                                         | Fix                                                 |
-| ------------------------------------------------------------- | --------------------------------------------------- |
-| Node major matches `engines` (24)                             | `nvm use`                                           |
-| current branch is `main`                                      | `git checkout main`                                 |
-| no uncommitted changes                                        | commit or stash                                     |
-| `main` equals `origin/main` after fetch                       | `git pull` (or push your local commits via a PR)    |
-| at least one pending changeset                                | nothing to release, or add one with `npx changeset` |
-| registry token: `npm whoami` works (on Actions: token is set) | fix the token in `~/.npmrc`                         |
-| `npm run verify`, `npm test`, `npm run build` pass            | fix the failure on `main` first                     |
+| Check                                                                          | Fix                                                 |
+| ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Node major matches `engines` (24)                                              | `nvm use`                                           |
+| current branch is `main`                                                       | `git checkout main`                                 |
+| no uncommitted changes                                                         | commit or stash                                     |
+| `main` equals `origin/main` after fetch                                        | `git pull` (or push your local commits via a PR)    |
+| at least one pending changeset                                                 | nothing to release, or add one with `npx changeset` |
+| registry login: `npm whoami` works (on Actions: the job has `id-token: write`) | `npm login`, or fix the workflow permissions        |
+| `npm run verify`, `npm test`, `npm run build` pass                             | fix the failure on `main` first                     |
 
 When every check passes it runs, in order:
 
@@ -109,14 +115,15 @@ the package is out but the version commit is lost; recover from your machine as 
 - **Published, push rejected** (someone pushed to `main` meanwhile): do not rewrite the published version. Rebase
   the release commit (`git pull --rebase`), push `main` and the tags, then create the GitHub Release.
 - **A bad version went out:** publish a fixed patch version through a new changeset. Use
-  `npm deprecate @devops-abcdigital/observability-node@<version> "<reason>" --registry=https://npm.pkg.github.com` to
-  warn users off the bad one.
+  `npm deprecate @devops-abcdigital/observability-node@<version> "<reason>"` to warn users off the bad one.
 
 ## Verify a published version
 
 ```bash
-npm view @devops-abcdigital/observability-node version --registry=https://npm.pkg.github.com
+npm view @devops-abcdigital/observability-node version
 mkdir /tmp/try && cd /tmp/try && npm init -y && npm install @devops-abcdigital/observability-node @opentelemetry/api
 ```
 
-The install must work with a `read:packages`-only token, as project developers and image builds use.
+The install must work with no `.npmrc` and no token, as project developers, image builds and CI use it.
+
+Version 0.1.0 was published to GitHub Packages before the move to npmjs.com; use 0.1.1 or later.
