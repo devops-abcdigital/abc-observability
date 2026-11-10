@@ -30,14 +30,13 @@ The same pages appear on the component's **Docs** tab in Backstage (`mkdocs.yml`
 
 ## Repository layout
 
-| Path                     | Content                                                     |
-| ------------------------ | ----------------------------------------------------------- |
-| `packages/node`          | the published library                                       |
-| `examples/multi-service` | runnable example (`gateway` → `auth` → `users` + otel-lgtm) |
-| `alerts`                 | Grafana alert rule, Teams message template, setup guide     |
-| `docs`                   | TechDocs pages                                              |
-| `scripts/release.mjs`    | the guarded release script                                  |
-| `docker-compose.dev.yml` | local Grafana + Tempo (`grafana/otel-lgtm`) for testing     |
+| Path                     | Content                                                                   |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `packages/node`          | the published library                                                     |
+| `examples/multi-service` | runnable example (`gateway` → `auth` → `users`, sent to the shared Alloy) |
+| `alerts`                 | Grafana alert rule, Teams message template, setup guide                   |
+| `docs`                   | TechDocs pages                                                            |
+| `scripts/release.mjs`    | the guarded release script                                                |
 
 ## Development
 
@@ -50,8 +49,8 @@ npm run verify     # types, lint, format
 npm test           # unit + integration tests (spawns real Node processes)
 ```
 
-Local trace backend: `docker compose -f docker-compose.dev.yml up -d`, then Grafana at <http://localhost:3001>
-(Explore → Tempo) and OTLP at `http://localhost:4318`.
+The tests need no trace backend: they run their own OTLP receiver. Traces are viewed only in the shared Grafana,
+through the shared Alloy on the servers.
 
 Changes to `packages/*` need a changeset (`npx changeset`). Releases: see [docs/releasing.md](docs/releasing.md).
 

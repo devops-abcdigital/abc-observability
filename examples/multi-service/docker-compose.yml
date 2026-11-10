@@ -1,17 +1,17 @@
-# gateway -> auth -> users, each loading the library with --import, plus otel-lgtm.
-# Run from the repository root:
-#   docker compose -f examples/multi-service/docker-compose.yml up --build
-# Grafana: http://localhost:3001 (Explore -> Tempo)
+# gateway -> auth -> users, each loading the library with --import, sending traces to the shared Alloy.
+# Run from the repository root, on a server where DevOps runs `alloy-shared` on the `abc_telemetry_network` network:
+#   docker compose -f examples/multi-service/docker-compose.yml up -d --build
+# View the traces in Grafana agf.abcdigital.io (Explore -> Tempo).
 x-service: &service
   build:
     context: ../..
     dockerfile: examples/multi-service/Dockerfile
   image: abc-observability-example
-  depends_on: [otel-lgtm]
+  networks: [default, telemetry]
 
 x-otel: &otel
-  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
-  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy-shared:4318
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=development
 
 services:
   gateway:
@@ -20,7 +20,7 @@ services:
     ports: ['8080:8080']
     environment:
       <<: *otel
-      OTEL_SERVICE_NAME: example-gateway-local
+      OTEL_SERVICE_NAME: example-gateway
       PORT: '8080'
       AUTH_URL: http://auth:8081
 
@@ -29,7 +29,7 @@ services:
     command: node --import @devops-abcdigital/observability-node/register src/auth.mjs
     environment:
       <<: *otel
-      OTEL_SERVICE_NAME: example-auth-local
+      OTEL_SERVICE_NAME: example-auth
       PORT: '8081'
       USERS_URL: http://users:8082
 
@@ -39,11 +39,10 @@ services:
     ports: ['8082:8082']
     environment:
       <<: *otel
-      OTEL_SERVICE_NAME: example-users-local
+      OTEL_SERVICE_NAME: example-users
       PORT: '8082'
 
-  otel-lgtm:
-    image: grafana/otel-lgtm:0.11.10
-    ports:
-      - '3001:3000'
-      - '4318:4318'
+networks:
+  telemetry:
+    external: true
+    name: abc_telemetry_network
