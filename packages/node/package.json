@@ -1,6 +1,6 @@
 {
   "name": "@devops-abcdigital/observability-node",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Zero-code OpenTelemetry tracing for ABC Digital Node services: load with node --import, set OTEL_* env vars.",
   "license": "UNLICENSED",
   "author": "group:abcdigital/developers",
