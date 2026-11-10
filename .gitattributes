@@ -1,0 +1,3 @@
+# Keep LF in every checkout, whatever core.autocrlf says: Prettier requires LF.
+* text=auto eol=lf
+*.png binary

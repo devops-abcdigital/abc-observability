@@ -1,17 +1,40 @@
 {
   "name": "abc-observability",
-  "version": "1.0.0",
-  "description": "abc-observability",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
-  },
-  "keywords": [],
+  "private": true,
+  "description": "Shared OpenTelemetry tracing library and alert rules for ABC Digital Node services",
+  "license": "UNLICENSED",
   "author": "group:abcdigital/developers",
-  "dependencies": {
-    "express": "^4.21.2"
+  "engines": {
+    "node": "24"
   },
-  "license": "UNLICENSED"
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "verify:repo": "eslint --max-warnings=0 \"scripts/**/*.mjs\" && prettier --check \"scripts/**/*.mjs\" \"*.{json,yml,mjs}\" \".github/**/*.yml\" \".changeset/*.json\" \"alerts/**/*.yaml\"",
+    "verify": "npm run verify:repo && npm run verify --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "fix": "prettier --write \"scripts/**/*.mjs\" && npm run fix --workspaces --if-present",
+    "release": "node scripts/release.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.12.0",
+    "@vitest/eslint-plugin": "1.6.27",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.2",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^4.1.0"
+  },
+  "allowScripts": {
+    "protobufjs": false
+  }
 }

@@ -1,0 +1,49 @@
+# gateway -> auth -> users, each loading the library with --import, plus otel-lgtm.
+# Run from the repository root:
+#   docker compose -f examples/multi-service/docker-compose.yml up --build
+# Grafana: http://localhost:3001 (Explore -> Tempo)
+x-service: &service
+  build:
+    context: ../..
+    dockerfile: examples/multi-service/Dockerfile
+  image: abc-observability-example
+  depends_on: [otel-lgtm]
+
+x-otel: &otel
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local
+
+services:
+  gateway:
+    <<: *service
+    command: node --import @devops-abcdigital/observability-node/register src/gateway.mjs
+    ports: ['8080:8080']
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: example-gateway-local
+      PORT: '8080'
+      AUTH_URL: http://auth:8081
+
+  auth:
+    <<: *service
+    command: node --import @devops-abcdigital/observability-node/register src/auth.mjs
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: example-auth-local
+      PORT: '8081'
+      USERS_URL: http://users:8082
+
+  users:
+    <<: *service
+    command: node --import @devops-abcdigital/observability-node/register src/users.mjs
+    ports: ['8082:8082']
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: example-users-local
+      PORT: '8082'
+
+  otel-lgtm:
+    image: grafana/otel-lgtm:0.11.10
+    ports:
+      - '3001:3000'
+      - '4318:4318'
