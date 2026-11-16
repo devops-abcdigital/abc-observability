@@ -2,7 +2,7 @@
 
 Zero-code OpenTelemetry **tracing** for ABC Digital Node.js services. Load it with `node --import`, set a few `OTEL_*` variables, and every incoming request, framework handler, database query and outgoing call shows up as one connected trace in Grafana (Tempo), across services.
 
-Only traces are exported. Logs and metrics are not sent.
+Only traces are exported; logs and metrics are not sent. Optionally, the library also posts a Teams message for every 500 error (see [Error notifications](#error-notifications)).
 
 ## Install
 
@@ -77,7 +77,7 @@ It takes a string on purpose: raw errors from HTTP clients often carry request U
 
 ### Background jobs
 
-Cron jobs and event listeners have no incoming request, so they have no root span. Wrap each run and name it `job.<area>.<task>`; the shared Teams error alert counts failed `job.*` spans:
+Cron jobs and event listeners have no incoming request, so they have no root span. Wrap each run and name it `job.<area>.<task>`, so failed runs are easy to find in Grafana:
 
 ```ts
 @Cron('*/5 * * * *')
@@ -95,6 +95,33 @@ async tick() {
 }
 ```
 
+## Error notifications
+
+Posts an Adaptive Card to a Microsoft Teams chat when a request answers 500 or above: service, environment, method, route pattern, error type, sanitized message and a **Xem trace** button that opens the trace in Grafana. It is off unless `ABC_ALERT_TEAMS_WEBHOOK_URL` is set, and works with tracing on or off.
+
+| Variable                         | Example                     | Notes                                                         |
+| -------------------------------- | --------------------------- | ------------------------------------------------------------- |
+| `ABC_ALERT_TEAMS_WEBHOOK_URL`    | (secret)                    | Teams Workflows webhook. **Required** to turn the feature on. |
+| `ABC_ALERT_GRAFANA_URL`          | `https://agf.abcdigital.io` | With the Tempo UID, adds the trace button.                    |
+| `ABC_ALERT_TEMPO_DATASOURCE_UID` | `ag2roz0cmsxs0a`            | Tempo data source UID in that Grafana.                        |
+| `ABC_ALERT_INCLUDE_MESSAGE`      | `false`                     | Leaves the error message out. Default: included.              |
+
+```ts
+// Express: after the routes, before your own error handler.
+import { teamsErrorNotifier } from '@devops-abcdigital/observability-node';
+app.use(teamsErrorNotifier());
+
+// NestJS: separate entry point, so Express apps never load @nestjs/*.
+import { TeamsExceptionFilter } from '@devops-abcdigital/observability-node/nestjs';
+app.useGlobalFilters(new TeamsExceptionFilter(app.get(HttpAdapterHost).httpAdapter));
+
+// Anywhere else that turns an error into a 500 response, e.g. your own exception filter.
+import { notifyServerError } from '@devops-abcdigital/observability-node';
+notifyServerError({ error, request, statusCode });
+```
+
+With your own global Nest filter, register `TeamsExceptionFilter` **first** (Nest tries global filters last to first) and call `notifyServerError()` in your filter for the 5xx exceptions it catches. The same error is sent at most once per 60 seconds, followed by a "repeated N times" summary. A summary still pending when the process stops is lost. Setup, the Teams Workflow and what is sent: [error notifications](../../docs/error-notifications.md).
+
 ## Shutdown
 
 Queued spans are flushed (at most 3 seconds) when the app stops:
@@ -105,6 +132,7 @@ Queued spans are flushed (at most 3 seconds) when the app stops:
 ## Safety
 
 - A failure to start the SDK or to export spans never crashes the app; at most one warning is written to stderr.
-- The library reads no secrets. Exporter credentials, if any, belong to the shared Alloy collector.
+- Exporter credentials, if any, belong to the shared Alloy collector. The only secret the library reads is `ABC_ALERT_TEAMS_WEBHOOK_URL`; the webhook call is excluded from tracing so the URL never reaches Tempo.
+- Error notifications are sent in the background with a 3 second timeout. A failing webhook never delays or changes the response; it prints at most one warning to stderr until a delivery succeeds again.
 
-More: [getting started](../../docs/getting-started.md), [conventions](../../docs/conventions.md).
+More: [getting started](../../docs/getting-started.md), [conventions](../../docs/conventions.md), [error notifications](../../docs/error-notifications.md).

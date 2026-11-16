@@ -1,7 +1,7 @@
 {
   "name": "abc-observability",
   "private": true,
-  "description": "Shared OpenTelemetry tracing library and alert rules for ABC Digital Node services",
+  "description": "Shared OpenTelemetry tracing library with Teams 500 error notifications for ABC Digital Node services",
   "license": "UNLICENSED",
   "author": "group:abcdigital/developers",
   "engines": {
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "verify:repo": "eslint --max-warnings=0 \"scripts/**/*.mjs\" && prettier --check \"scripts/**/*.mjs\" \"*.{json,yml,mjs}\" \".github/**/*.yml\" \".changeset/*.json\" \"alerts/**/*.yaml\"",
+    "verify:repo": "eslint --max-warnings=0 \"scripts/**/*.mjs\" && prettier --check \"scripts/**/*.mjs\" \"*.{json,yml,mjs}\" \".github/**/*.yml\" \".changeset/*.json\"",
     "verify": "npm run verify:repo && npm run verify --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "fix": "prettier --write \"scripts/**/*.mjs\" && npm run fix --workspaces --if-present",

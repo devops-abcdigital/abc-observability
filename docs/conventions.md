@@ -1,6 +1,6 @@
 # Conventions
 
-Shared names keep traces from different projects searchable side by side, and the Teams error alert relies on
+Shared names keep traces from different projects searchable side by side, and the Teams error notifications show
 some of them. Follow these in every project that uses `@devops-abcdigital/observability-node`.
 
 ## Service name
@@ -25,7 +25,7 @@ Set with `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<value>`.
 | `staging`     | staging / UAT     |
 | `production`  | production        |
 
-Alerts group by service name and environment, so spell them exactly like this.
+Trace searches and Teams notifications use the service name and environment, so spell them exactly like this.
 
 ## Span names
 
@@ -47,9 +47,9 @@ job.invoice.reminder
 job.example.cleanup
 ```
 
-This prefix is defined here once. The shared Teams error alert counts failed spans that are either server spans
-(failed requests) or spans whose name starts with `job.` (failed jobs). A job that is not named this way, or
-that swallows its errors without calling `markSpanError()`, is invisible to the alert.
+This prefix is defined here once, so one query finds every failed job across projects:
+`{ name =~ "job[.].*" && status = error }`. A job that is not named this way, or that swallows its errors without
+calling `markSpanError()`, is invisible to that query.
 
 ## Attributes
 

@@ -48,7 +48,19 @@ TraceQL to find them directly:
 
 ```
 { status = error && name = "users.find" }
-{ name =~ "job\\..*" && status = error }
+{ name =~ "job[.].*" && status = error }
 ```
+
+## Teams notification
+
+`users` registers `teamsErrorNotifier()` before its own error handler. Export the webhook URL of a Teams Workflow
+(see [error notifications](../../docs/error-notifications.md)) before `docker compose up`, and the `broken` request
+also posts a card with a **Xem trace** button to that chat:
+
+```bash
+export ABC_ALERT_TEAMS_WEBHOOK_URL='https://...'   # never commit it
+```
+
+Without the variable nothing is sent.
 
 Stop with `docker compose -f examples/multi-service/docker-compose.yml down`.

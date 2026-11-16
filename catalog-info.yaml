@@ -3,7 +3,7 @@ kind: Component
 metadata:
   namespace: abcdigital
   name: "abc-observability"
-  description: "Shared OpenTelemetry tracing library for Node services (@devops-abcdigital/observability-node) and Teams error alert rules"
+  description: "Shared OpenTelemetry tracing library for Node services (@devops-abcdigital/observability-node) with Teams 500 error notifications"
   annotations:
     backstage.io/techdocs-ref: dir:.
     github.com/project-slug: devops-abcdigital/abc-observability

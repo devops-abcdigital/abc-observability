@@ -3,6 +3,8 @@
 const { trace } = require('@opentelemetry/api');
 const express = require('express');
 
+const { teamsErrorNotifier } = require('../../../dist/index.js');
+
 const app = express();
 
 app.get('/a', async (_req, res) => {
@@ -26,6 +28,13 @@ app.get('/recording', (_req, res) => {
   span.end();
   res.json({ recording });
 });
+
+app.get('/fail', () => {
+  throw new Error('fixture failure');
+});
+
+// Reports to Teams only when ABC_ALERT_TEAMS_WEBHOOK_URL is set; Express then answers 500 as usual.
+app.use(teamsErrorNotifier());
 
 const server = app.listen(0, '127.0.0.1', () => {
   process.stdout.write(`listening ${server.address().port}\n`);

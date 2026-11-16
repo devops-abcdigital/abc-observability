@@ -1,6 +1,7 @@
-// users: GET /users/:id. The id "broken" fails, so the error shows up in this service's span.
+// users: GET /users/:id. The id "broken" fails, so the error shows up in this service's span and, when
+// ABC_ALERT_TEAMS_WEBHOOK_URL is set, as a message in the Teams chat.
 // Also runs a background cleanup job to show how jobs get their own `job.*` root span.
-import { markSpanError, withSpan } from '@devops-abcdigital/observability-node';
+import { markSpanError, teamsErrorNotifier, withSpan } from '@devops-abcdigital/observability-node';
 
 import { createApp, errorHandler, listen } from './http.mjs';
 
@@ -26,7 +27,7 @@ function findUser(id) {
 
 /**
  * Background job. Like many real jobs it catches its own errors and reports a result instead of
- * throwing, so it calls markSpanError() for the failure to reach the trace (and the Teams alert).
+ * throwing, so it calls markSpanError() for the failure to reach the trace.
  */
 function runCleanup({ fail = false } = {}) {
   return withSpan('job.example.cleanup', async (span) => {
@@ -54,11 +55,13 @@ app.get('/users/:id', async (req, res, next) => {
   }
 });
 
-// Trigger the job on demand; `?fail=1` makes it fail (used to test job error alerts).
+// Trigger the job on demand; `?fail=1` makes it fail (to see a failed job span in the trace).
 app.post('/jobs/cleanup', async (req, res) => {
   res.json(await runCleanup({ fail: req.query.fail === '1' }));
 });
 
+// Reports 500s to Teams, then hands the error to the service's own handler.
+app.use(teamsErrorNotifier());
 app.use(errorHandler(SERVICE));
 listen(app, SERVICE, Number(process.env.PORT ?? 8082));
 

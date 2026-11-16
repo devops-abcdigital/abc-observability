@@ -41,6 +41,10 @@ services:
       <<: *otel
       OTEL_SERVICE_NAME: example-users
       PORT: '8082'
+      # Optional: export ABC_ALERT_TEAMS_WEBHOOK_URL in your shell to get the 500s in a Teams chat.
+      ABC_ALERT_TEAMS_WEBHOOK_URL: ${ABC_ALERT_TEAMS_WEBHOOK_URL:-}
+      ABC_ALERT_GRAFANA_URL: https://agf.abcdigital.io
+      ABC_ALERT_TEMPO_DATASOURCE_UID: ag2roz0cmsxs0a
 
 networks:
   telemetry:

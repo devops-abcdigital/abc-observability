@@ -72,8 +72,7 @@ A full three-service trace is in
 
 Cron jobs and event listeners have no incoming request, so wrap each run in a span named `job.<area>.<task>`.
 When code catches an error and returns a result instead of throwing, call `markSpanError()` with a sanitized
-message. Both are needed for the [Teams error alert](alerts.md)
-to see job failures.
+message. Both make job failures easy to find in Grafana (`{ name =~ "job[.].*" && status = error }`).
 
 ```ts
 import { markSpanError, withSpan } from '@devops-abcdigital/observability-node';
@@ -83,6 +82,11 @@ await withSpan('job.invoice.reminder', async () => {
   if (result.error) markSpanError(result.error);
 });
 ```
+
+## 500 errors in Teams (optional)
+
+To get a Teams message with a link to the trace whenever a request answers 500, add one middleware (Express) or one
+global filter (NestJS) and set `ABC_ALERT_TEAMS_WEBHOOK_URL`. See [Teams error notifications](error-notifications.md).
 
 ## Troubleshooting
 

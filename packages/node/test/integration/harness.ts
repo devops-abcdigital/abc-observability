@@ -85,9 +85,9 @@ export async function startReceiver() {
 
 export type Receiver = Awaited<ReturnType<typeof startReceiver>>;
 
-/** Parent env without any OTEL_* / ABC_OTEL_* values so tests control configuration exactly. */
+/** Parent env without any OTEL_* / ABC_OTEL_* / ABC_ALERT_* values so tests control configuration exactly. */
 function cleanEnv(): NodeJS.ProcessEnv {
-  return Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(ABC_)?OTEL_/.test(key)));
+  return Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(ABC_)?OTEL_|^ABC_ALERT_/.test(key)));
 }
 
 export interface StartedApp {
