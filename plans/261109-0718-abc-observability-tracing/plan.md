@@ -30,7 +30,7 @@ Repo `devops-abcdigital/abc-observability` (`D:\Workspace\abc\abc-observability`
 | 1 | [Convert Repository to Library Monorepo](./phase-01-start.md) | Xong (chưa xác nhận Backstage hiển thị `library` và CI chạy trên GitHub) |
 | 2 | [Node Tracing Library](./phase-02-node-tracing-library.md) | Xong |
 | 3 | [Examples, Docs and Release](./phase-03-examples-docs-and-release.md) | Đang làm: chờ người release publish `0.1.0` |
-| 4 | [Teams Error Alerts](./phase-04-teams-error-alerts.md) | Phần repo xong, đã kiểm chứng trên otel-lgtm; chờ cài trên Grafana chung + Teams |
+| 4 | [Teams Error Alerts](./phase-04-teams-error-alerts.md) | Bị thay thế bởi [plan báo lỗi 500 vào Teams](../261116-1229-teams-500-error-notifications/plan.md); luồng Grafana alert đã gỡ |
 | 5 | [Adopt in awp-product-hub](./phase-05-adopt-in-awp-product-hub.md) | Đang làm: code xong trên nhánh `ABCDG-0000-setup-tracing`, chờ `0.1.0` để thêm dependency |
 
 Phụ thuộc: 1 → 2 → 3, sau đó phase 4 và 5 làm song song được (cả hai chỉ cần phase 3).

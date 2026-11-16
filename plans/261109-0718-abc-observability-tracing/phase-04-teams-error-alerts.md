@@ -1,13 +1,17 @@
 ---
 phase: 4
 title: "Phase 4: Teams Error Alerts"
-status: in-progress
+status: cancelled
 priority: P2
 effort: "0.5d"
 dependencies: [3]
 ---
 
 # Phase 4: Teams Error Alerts
+
+> **Bị thay thế (2026-11-16):** lib tự gửi lỗi 500 vào Teams qua webhook, không dùng Grafana alert. Xem
+> [plan báo lỗi 500 vào Teams](../261116-1229-teams-500-error-notifications/plan.md). Thư mục `alerts/` và
+> `docs/alerts.md` đã bị xoá; nội dung cũ còn trong lịch sử git.
 
 <!-- 2026-11-09: rules use Tempo span metrics (TraceQL metrics cannot feed Grafana 12.1 alerts because of exemplar frames). Verified on grafana/otel-lgtm (Grafana 12.1.1, Tempo 2.8.2) with a local stand-in for the Teams webhook: FIRING for request and job errors, RESOLVED ~6 min later, committed YAML loads via file provisioning. Remaining on the shared Grafana: DevOps prerequisites (metrics-generator span metrics + deployment.environment dimension), Teams Workflow, contact point, policy, rules, real FIRING/RESOLVED test. Full guide: docs/alerts.md. -->
 
