@@ -2,10 +2,10 @@ import { context, createContextKey, isSpanContextValid, trace, TraceFlags } from
 
 import { alertConfig } from '../config';
 import { MAX_SCANNED_LENGTH, sanitizeMessage } from './sanitize';
-import { errorCard, repeatCard, traceUrl } from './teams-card';
+import { errorCard, repeatCard, traceUrl } from './teams-card.builder';
 
 import type { AlertConfig } from '../config';
-import type { ServerErrorEvent, TeamsPayload } from './teams-card';
+import type { ServerErrorEvent, TeamsPayload } from './teams-card.builder';
 
 /** Same error (service, method, route, type) within this window: first one is sent, the rest are counted. */
 export const DEDUPE_WINDOW_MS = 60_000;

@@ -1,7 +1,7 @@
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 
-import type { TeamsPayload } from '../../src/alerts/teams-card';
+import type { TeamsPayload } from '../../src/error-notifications/teams-card.builder';
 import type { AddressInfo } from 'node:net';
 
 export interface FakeWebhookOptions {

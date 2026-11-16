@@ -13,7 +13,7 @@ import {
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { notifyServerError, resetNotifier, settleNotifications } from '../../src/alerts/notify';
+import { notifyServerError, resetNotifier, settleNotifications } from '../../src/error-notifications/notify';
 import { TeamsExceptionFilter } from '../../src/nestjs';
 import { cardText, startFakeWebhook } from './fake-webhook';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_MESSAGE_LENGTH, sanitizeMessage } from '../../src/alerts/sanitize';
+import { MAX_MESSAGE_LENGTH, sanitizeMessage } from '../../src/error-notifications/sanitize';
 
 describe('sanitizeMessage', () => {
   it('drops credentials from URLs but keeps scheme and host', () => {

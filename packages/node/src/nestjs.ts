@@ -1,9 +1,9 @@
 import { Catch } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 
-import { notifyServerError } from './alerts/notify';
+import { notifyServerError } from './error-notifications/notify';
 
-import type { ServerErrorRequest } from './alerts/notify';
+import type { ServerErrorRequest } from './error-notifications/notify';
 import type { ArgumentsHost } from '@nestjs/common';
 
 /**

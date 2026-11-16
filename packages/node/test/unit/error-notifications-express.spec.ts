@@ -4,7 +4,7 @@ import express from 'express';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { teamsErrorNotifier } from '../../src';
-import { resetNotifier, settleNotifications } from '../../src/alerts/notify';
+import { resetNotifier, settleNotifications } from '../../src/error-notifications/notify';
 import { cardText, startFakeWebhook } from './fake-webhook';
 
 import type { FakeWebhook } from './fake-webhook';

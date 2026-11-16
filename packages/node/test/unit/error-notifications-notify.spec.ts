@@ -10,11 +10,11 @@ import {
   resetNotifier,
   SEND_TIMEOUT_MS,
   settleNotifications,
-} from '../../src/alerts/notify';
+} from '../../src/error-notifications/notify';
 import { withSpan } from '../../src/tracing';
 import { cardActionUrl, cardFacts, cardText, startFakeWebhook } from './fake-webhook';
 
-import type { TeamsPayload } from '../../src/alerts/teams-card';
+import type { TeamsPayload } from '../../src/error-notifications/teams-card.builder';
 import type { FakeWebhook } from './fake-webhook';
 
 const provider = new TracerProvider({

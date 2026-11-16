@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { errorCard, repeatCard, traceUrl } from '../../src/alerts/teams-card';
+import { errorCard, repeatCard, traceUrl } from '../../src/error-notifications/teams-card.builder';
 import { cardActionUrl, cardFacts, cardText } from './fake-webhook';
 
-import type { ServerErrorEvent } from '../../src/alerts/teams-card';
+import type { ServerErrorEvent } from '../../src/error-notifications/teams-card.builder';
 
 const TRACE_ID = '4bf92f3577b34da6a3ce929d0e0e4736';
 const LINK = { grafanaUrl: 'https://grafana.example.com', tempoDatasourceUid: 'tempo-uid' };
