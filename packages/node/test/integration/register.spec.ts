@@ -2,8 +2,10 @@ import { once } from 'node:events';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { cardActionUrl, cardFacts, cardText, startFakeWebhook } from '../unit/fake-webhook';
 import { delay, runShortJob, SPAN_KIND_CLIENT, SPAN_KIND_SERVER, startApp, startReceiver, waitFor } from './harness';
 
+import type { FakeWebhook } from '../unit/fake-webhook';
 import type { Receiver, StartedApp } from './harness';
 
 const SERVICE_NAME = 'observability-node-it';
@@ -134,5 +136,52 @@ describe('node --import register', () => {
     expect(code).toBe(0);
     expect(durationMs).toBeLessThan(EXIT_DEADLINE_MS);
     expect(receiver.spans.map((s) => s.name)).toContain('job.fixture.run');
+  });
+});
+
+describe('Teams error notifications in a traced app', () => {
+  let webhook: FakeWebhook;
+
+  beforeEach(async () => {
+    webhook = await startFakeWebhook();
+  });
+
+  afterEach(async () => {
+    await webhook.close();
+  });
+
+  it('links the card to the exported trace and keeps the webhook call out of the traces', async () => {
+    app = await startApp(
+      tracingEnv({
+        ABC_ALERT_TEAMS_WEBHOOK_URL: webhook.url,
+        ABC_ALERT_GRAFANA_URL: 'https://grafana.example.com',
+        ABC_ALERT_TEMPO_DATASOURCE_UID: 'tempo-uid',
+      }),
+    );
+
+    const response = await fetch(`${app.baseUrl}/fail`);
+    expect(response.status).toBe(500);
+
+    const payload = await waitFor(() => webhook.payloads[0]);
+    const server = await waitFor(() =>
+      receiver.spans.find((s) => s.kind === SPAN_KIND_SERVER && s.attributes['url.path'] === '/fail'),
+    );
+    expect(cardText(payload)).toContain('500 · GET /fail · observability-node-it');
+    expect(cardFacts(payload).trace_id).toBe(server.traceId);
+    expect(decodeURIComponent(cardActionUrl(payload) ?? '')).toContain(server.traceId);
+
+    // Give the batch processor time to export a span for the webhook call, if one existed.
+    await delay(500);
+    expect(receiver.spans.filter((s) => s.kind === SPAN_KIND_CLIENT)).toEqual([]);
+    expect(JSON.stringify(receiver.spans)).not.toContain('/workflows/webhook');
+  });
+
+  it('sends nothing without a webhook URL', async () => {
+    app = await startApp(tracingEnv());
+
+    expect((await fetch(`${app.baseUrl}/fail`)).status).toBe(500);
+    await delay(500);
+
+    expect(webhook.payloads).toHaveLength(0);
   });
 });
