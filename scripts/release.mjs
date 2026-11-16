@@ -4,11 +4,11 @@
 // instead of copying these steps.
 //
 //   npm run release             check, version, commit, publish, tag, push, GitHub Release
-//   npm run release -- --dry-run   run every check plus `npm publish --dry-run`; no commit, no push
+//   npm run release -- --dry-run   run every check, then `npm publish --dry-run` of the next versions; changes nothing
 //
 // Every check stops the script before anything is published. Tokens are never printed.
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -136,10 +136,32 @@ function releaseNotes(packageDir, version) {
     .trim();
 }
 
+function packageVersions() {
+  return new Map(publishablePackages().map((dir) => [dir, readJson(path.join(dir, 'package.json')).version]));
+}
+
+/**
+ * Rehearses the publish with the versions the release would produce. The current version is already on the registry,
+ * and npm refuses to publish over it even with --dry-run, so the pending changesets are applied first and every file
+ * is put back afterwards. checkCleanTree ran before this, so restoring HEAD and deleting untracked files drops only
+ * the rehearsal's changes.
+ */
 function dryRunPublish() {
-  for (const dir of publishablePackages()) {
-    step(`npm publish --dry-run (${dir})`);
-    npm(['publish', '--dry-run', `--workspace=${dir}`]);
+  const before = packageVersions();
+  step('changeset version (rehearsal, undone afterwards)');
+  npm(['exec', '--', 'changeset', 'version']);
+  try {
+    for (const [dir, version] of packageVersions()) {
+      if (version === before.get(dir)) continue;
+      step(`npm publish --dry-run ${dir}: ${before.get(dir)} → ${version}`);
+      npm(['publish', '--dry-run', `--workspace=${dir}`]);
+    }
+  } finally {
+    git(['restore', '--source=HEAD', '--staged', '--worktree', '--', '.']);
+    // Only files the rehearsal created (e.g. a first CHANGELOG.md): `git clean` would also take untracked folders.
+    for (const file of git(['ls-files', '--others', '--exclude-standard']).split('\n').filter(Boolean)) {
+      rmSync(path.join(ROOT, file));
+    }
   }
 }
 
