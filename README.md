@@ -5,14 +5,14 @@ Shared observability for ABC Digital Node.js services:
 - **[`@devops-abcdigital/observability-node`](packages/node)**: an OpenTelemetry tracing library. Install it, start the
   app with `node --import`, set a few `OTEL_*` variables, and every request, framework handler, database query and
   outgoing call becomes one connected trace across services. Traces only; no logs or metrics.
-- **[Teams error alerts](alerts)**: Grafana alert rules that post to one shared Microsoft Teams channel when a
-  service's failed requests or failed background jobs pass a threshold.
+- **[Teams error notifications](docs/error-notifications.md)**: the same library posts a card to a Microsoft Teams
+  chat when a request answers 500, with a button that opens its trace in Grafana.
 
 ```
-App (node --import …/register)
-  │ OTLP/HTTP :4318
-  ▼
-Alloy (alloy-shared, run by DevOps) ──▶ Tempo ──▶ Grafana agf.abcdigital.io ──▶ Teams alert channel
+App (node --import …/register) ──── on a 500: Adaptive Card via webhook ────▶ Teams chat
+  │ OTLP/HTTP :4318                                                              │ "Xem trace"
+  ▼                                                                              ▼
+Alloy (alloy-shared, run by DevOps) ──▶ Tempo ──▶ Grafana agf.abcdigital.io ◀────┘
 ```
 
 This repository is a library: nothing here is deployed.
@@ -22,7 +22,7 @@ This repository is a library: nothing here is deployed.
 - [Getting started](docs/getting-started.md): add tracing to a service in three steps.
 - [Conventions](docs/conventions.md): service names, environments, span and job names, data that must never go into a
   span.
-- [Teams error alerts](docs/alerts.md): how failures become Teams messages.
+- [Teams error notifications](docs/error-notifications.md): 500 errors as Teams messages with a link to the trace.
 - [Releasing](docs/releasing.md): publishing a new version.
 - [Example](examples/multi-service): three services in one trace, a failing service and a background job.
 
@@ -34,7 +34,6 @@ The same pages appear on the component's **Docs** tab in Backstage (`mkdocs.yml`
 | ------------------------ | ------------------------------------------------------------------------- |
 | `packages/node`          | the published library                                                     |
 | `examples/multi-service` | runnable example (`gateway` → `auth` → `users`, sent to the shared Alloy) |
-| `alerts`                 | Grafana alert rule, Teams message template, setup guide                   |
 | `docs`                   | TechDocs pages                                                            |
 | `scripts/release.mjs`    | the guarded release script                                                |
 
@@ -58,4 +57,4 @@ Changes to `packages/*` need a changeset (`npx changeset`). Releases: see [docs/
 
 `catalog-info.yaml` registers this repository as a `library` component; `infra_info.json` holds its catalog metadata.
 Neither contains secrets, and none may be added: npm publishing uses trusted publishing (no token), and the Teams
-webhook URL lives only in Grafana's contact point.
+webhook URL lives only in each service's deployment secrets (`ABC_ALERT_TEAMS_WEBHOOK_URL`).
