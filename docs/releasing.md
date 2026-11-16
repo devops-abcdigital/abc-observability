@@ -43,7 +43,8 @@ Commit the generated `.changeset/*.md` with the PR.
 
 1. Merge the PRs with their changesets into `main`.
 2. Open **Actions → Release → Run workflow**, keep the branch `main`, leave **Dry run** ticked, and run it. It runs
-   every check and `npm publish --dry-run`, and changes nothing.
+   every check, then rehearses the publish of the next version (it applies the changesets, runs
+   `npm publish --dry-run`, and puts every file back), and changes nothing.
 3. When the dry run is green, run the workflow again with **Dry run** unticked. It publishes, pushes the
    `chore(release): version packages` commit and the tag to `main`, and creates the GitHub Release.
 
@@ -64,7 +65,7 @@ The workflow needs `main` to accept pushes from GitHub Actions. If `main` gets b
 ```bash
 git checkout main
 git pull
-npm run release -- --dry-run   # all checks + npm publish --dry-run, changes nothing
+npm run release -- --dry-run   # all checks + npm publish --dry-run of the next version, changes nothing
 npm run release
 ```
 

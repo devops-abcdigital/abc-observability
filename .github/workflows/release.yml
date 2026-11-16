@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Dry run (all checks + npm publish --dry-run; publishes nothing)
+        description: Dry run (all checks + npm publish --dry-run of the next version; publishes nothing)
         type: boolean
         default: true
 
